@@ -11,35 +11,118 @@ The study focuses on tropical cyclones in the **North Atlantic basin (1980–202
 
 ## Methodology
 
-### 1. Parametric Wave Model (`PModel`)
+### 1. Parametric Wave Model and Batch Processing (`PModel_fast_identical`)
 
-The function `PModel` computes spatial fields of significant wave height (Hs) from cyclone parameters:
+The generation of significant wave height (Hs) fields is performed through a **fully automated batch-processing pipeline** based on IBTrACS tropical cyclone data.
 
-* Maximum wind speed (`Vmax`)
-* Forward motion (`Vfm`)
-* Radius of maximum winds (`Rmax`)
-* Cyclone position (`Lat0`, `Lon0`)
+#### Workflow
 
-The model:
+**Input data ingestion**
+   * Reads cyclone tracks from IBTrACS (`IBTrACS_NA_1980_2025.csv`)
+   * Extracts:
+     * Position:
+       * Latitude (degrees)
+       * Longitude (degrees)
+     * Maximum wind speed (`USA_WIND`, **knots → converted to m/s**)
+     * Radius of maximum winds (`USA_RMW`, **nautical miles → converted to meters**)
+     * Time (`ISO_TIME`, UTC)
+     * Storm Identifier (`SID`, dimensionless)
 
-* Applies physical constraints to input parameters
-* Computes maximum wave height using an empirical formulation
-* Interpolates precomputed wave fields (multidimensional interpolation)
-* Generates spatial grids of wave height
-* Exports results to CSV files
+**Storm-based processing**
+   * Data are grouped by **Storm Identifier (SID)**
+   * One output folder is created per cyclone:
+
+     ```
+     NAME_SID/
+     ```
+
+**Time-step iteration**
+   For each time step:
+   * Forward velocity (`Vfm`, **m/s**) is computed using the haversine distance
+   * Wind speed is converted to **m/s**
+   * Missing or invalid `RMW` values are replaced with a default (**30 km = 30,000 m**)
+   * Derived parameter:
+     * `R34` (**meters**)
+   * Physical constraints are applied to all parameters
+
+**Parallel execution**
+   * Processing is parallelized using MATLAB `parfor`
+   * Each time step is computed independently for efficiency
+
+#### Wave Model
+
+The function `PModel_fast_identical` computes the wave field using:
+
+* Empirical formulation for:
+  * Maximum significant wave height (**Hs_max, meters**)
+* Multidimensional interpolation of precomputed wave diagrams
+* Spatial transformation to geographic coordinates
 
 **Important note**:
-This implementation is a **modified version** of:
+This implementation is a **modified and optimized version** of:
 
 > Grossmann-Matheson, G., Young, I. R., Alves, J.-H., & Meucci, A.
 > *Development and validation of a parametric tropical cyclone wave height prediction model*
 
-#### Modifications introduced:
+#### Key Improvements
 
-* Vectorized implementation (performance improvement)
-* Adaptation for batch processing
-* CSV export for reproducibility
-* Integration with geospatial grids
+* Parallel processing (`parfor`) for large datasets
+* Persistent memory caching of `.mat` files (major speed-up)
+* Fully automated batch execution across all cyclones
+* Robust handling of:
+
+  * Missing data (`NaN`)
+  * Inconsistent time formats
+  * Longitude normalization (degrees)
+* Direct CSV export per time step
+
+#### Outputs
+
+For each cyclone:
+
+```
+NAME_SID/
+   ├── NAME_SID_P001.csv
+   ├── NAME_SID_P002.csv
+   └── ...
+```
+
+Each file contains:
+
+```
+ISO_Time (UTC) | Latitud (degrees) | Longitud (degrees) | Hs_m (meters)
+```
+
+#### Computational Details
+
+* Precomputed wave fields are loaded from:
+
+  ```
+  Hsmax_diagrams/
+  ```
+
+* Interpolation is performed in a **4D parameter space**:
+
+  * Wind speed `Vmax` (**m/s**)
+  * Forward speed `Vfm` (**m/s**)
+  * Radius `R34` (**km in interpolation space**)
+  * Radius `Rmax` (**km in interpolation space**)
+
+#### Spatial Output
+
+* Wave fields are generated in geographic coordinates:
+  * Latitude (**degrees**)
+  * Longitude (**degrees**)
+* Conversion assumptions:
+  * 1° ≈ 111.1 km
+* Output wave height:
+  * `Hs` (**meters**)
+
+#### Notes
+
+* Results are sensitive to input cyclone parameters
+* Default assumptions (e.g., missing RMW) may affect accuracy
+* The model is intended for research applications
 
 ### 2. Footprint Extraction (Batch Processing Script)
 
