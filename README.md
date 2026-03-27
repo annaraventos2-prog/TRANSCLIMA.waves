@@ -238,6 +238,14 @@ and the original model:
 ```text
 Grossmann-Matheson et al. (2023) Development and validation of a parametric tropical cyclone wave height prediction model.
 ```
+## Authors and Supervision
+
+* **Anna Raventós** – Main developer and data processing. 
+* **Itxaso Odériz** – Project supervisor and conceptual methodology.
+
+## Funding
+This work has been supported by the **TRANSCLIMA** project (CGL2016-77393-R).
+
 ## Funding
 
 This work has been supported by the TRANSCILMA project.
