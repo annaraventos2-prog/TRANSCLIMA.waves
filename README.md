@@ -217,7 +217,7 @@ Hs_max   : maximum significant wave height (m)
 ## Data Availability
 
 Dataset available on Zenodo:
-[DOI to be added after publication]
+(https://doi.org/10.5281/zenodo.19261432)
 
 ## Notes
 
