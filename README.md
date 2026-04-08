@@ -59,7 +59,7 @@ The generation of significant wave height (Hs) fields is performed through a **f
 8. Convert to Lat/Lon grid
 9. Save snapshot (`*_PXXX.csv`)
 
-#### Outputs
+#### Output data
 For each cyclone:
 ```
 NAME_SID/
