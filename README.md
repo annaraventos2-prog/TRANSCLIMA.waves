@@ -5,7 +5,7 @@ This repository contains the MATLAB code used to generate the dataset:
 **Important note**:
 This implementation is a **modified and optimized version** of:
 
-> Grossmann-Matheson, G., Young, I. R., Alves, J.-H., & Meucci, A.
+> Grossmann-Matheson, G., Young, I. R., Alves, J.-H., & Meucci, A. (2023)
 > *Development and validation of a parametric tropical cyclone wave height prediction model*
 
 The workflow includes:
